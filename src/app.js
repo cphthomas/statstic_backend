@@ -19,7 +19,18 @@ app.get("/app", (req, res) => {
 });
 
 // body parser
-app.use(express.json());
+// app.use(express.json());
+app.use((req, res, next) => {
+  console.log("req.originalUrl",req.originalUrl)
+  if (
+    req.originalUrl === "/app/api/checkout-complete" ||
+    req.originalUrl === "/app/api/subscription-deleted"
+  ) {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: true }));
 
 // define api and web router

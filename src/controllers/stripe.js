@@ -51,14 +51,12 @@ createCheckout = async (req, res) => {
 
 // checkoutComplete = async ({ body, headers }, context) => {
 checkoutComplete = async (req, res) => {
-  console.log(JSON.stringify(req.body, null, 2));
   try {
     const stripeEvent = await stripe.webhooks.constructEvent(
       req.body,
       req.headers["stripe-signature"],
       "whsec_jgmjekj4G4Jtln0Hr4MpbjVsFdmlBWev"
     );
-    console.log("stripeEvent");
 
     if (stripeEvent.type !== "checkout.session.completed") return;
 
@@ -138,11 +136,8 @@ checkoutComplete = async (req, res) => {
       }
     }
   } catch (err) {
-    //console.log(err.message);
-    return res.send({
-      status: 400,
-      body: `Webhook Error: ${err.message}`,
-    });
+    console.log(err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
     // return {
     //   statusCode: 400,
     //   body: `Webhook Error: ${err.message}`,

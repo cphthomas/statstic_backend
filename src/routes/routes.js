@@ -16,7 +16,15 @@ router.post("/sign-up", auth.signUp);
 
 // Stripe
 router.post("/create-stripe-checkout", stripe.createCheckout);
-router.post("/checkout-complete", stripe.checkoutComplete);
-router.post("/subscription-deleted", stripe.subscriptionDeleted);
+router.post(
+  "/checkout-complete",
+  express.raw({ type: "application/json" }),
+  stripe.checkoutComplete
+);
+router.post(
+  "/subscription-deleted",
+  express.raw({ type: "application/json" }),
+  stripe.subscriptionDeleted
+);
 
 module.exports = router;
