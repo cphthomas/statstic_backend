@@ -49,13 +49,16 @@ createCheckout = async (req, res) => {
   });
 };
 
-checkoutComplete = async ({ body, headers }, context) => {
+// checkoutComplete = async ({ body, headers }, context) => {
+checkoutComplete = async (req, res) => {
+  console.log(JSON.stringify(req.body, null, 2));
   try {
     const stripeEvent = await stripe.webhooks.constructEvent(
-      body,
-      headers["stripe-signature"],
+      req.body,
+      req.headers["stripe-signature"],
       "whsec_jgmjekj4G4Jtln0Hr4MpbjVsFdmlBWev"
     );
+    console.log("stripeEvent");
 
     if (stripeEvent.type !== "checkout.session.completed") return;
 
@@ -112,25 +115,38 @@ checkoutComplete = async ({ body, headers }, context) => {
           });
         }
       });
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ received: subscription.customer }),
-      };
+      return res.send({
+        status: 200,
+        body: { received: subscription.customer },
+      });
+      // return {
+      //   statusCode: 200,
+      //   body: JSON.stringify({ received: subscription.customer }),
+      // };
     } catch (error) {
-      return {
-        statusCode: 400,
+      return res.send({
+        status: 400,
         body: `Webhook Error: ${error.message}`,
-      };
+      });
+      // return {
+      //   statusCode: 400,
+      //   body: `Webhook Error: ${error.message}`,
+      // };
     } finally {
       if (connection) {
         await connection.end();
       }
     }
   } catch (err) {
-    return {
-      statusCode: 400,
+    //console.log(err.message);
+    return res.send({
+      status: 400,
       body: `Webhook Error: ${err.message}`,
-    };
+    });
+    // return {
+    //   statusCode: 400,
+    //   body: `Webhook Error: ${err.message}`,
+    // };
   } finally {
     if (connection) {
       await connection.end();
@@ -138,11 +154,11 @@ checkoutComplete = async ({ body, headers }, context) => {
   }
 };
 
-subscriptionDeleted = async ({ body, headers }, context) => {
+subscriptionDeleted = async (req, res) => {
   try {
     const stripeEvent = await stripe.webhooks.constructEvent(
-      body,
-      headers["stripe-signature"],
+      req.body,
+      req.headers["stripe-signature"],
       "whsec_jOwO2ytLcWZoTWe1NGQt82Rab5K2zxJu"
     );
     if (stripeEvent.type !== "customer.subscription.deleted") return;
@@ -184,25 +200,38 @@ subscriptionDeleted = async ({ body, headers }, context) => {
 
       await connection.end();
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ received: subscription.customer }),
-      };
+      return res.send({
+        status: 200,
+        body: { received: subscription.customer },
+      });
+
+      // return {
+      //   statusCode: 200,
+      //   body: JSON.stringify({ received: subscription.customer }),
+      // };
     } catch (error) {
-      return {
-        statusCode: 400,
+      return res.send({
+        status: 400,
         body: `Webhook Error: ${error.message}`,
-      };
+      });
+      // return {
+      //   statusCode: 400,
+      //   body: `Webhook Error: ${error.message}`,
+      // };
     } finally {
       if (connection) {
         connection.end();
       }
     }
   } catch (error) {
-    return {
-      statusCode: 400,
+    return res.send({
+      status: 400,
       body: `Webhook Error: ${error.message}`,
-    };
+    });
+    // return {
+    //   statusCode: 400,
+    //   body: `Webhook Error: ${error.message}`,
+    // };
   }
 };
 
