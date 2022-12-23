@@ -2,6 +2,7 @@ const express = require("express");
 const router = new express.Router();
 const test = require("../controllers/test");
 const auth = require("../controllers/auth");
+const user = require("../controllers/user");
 const stripe = require("../controllers/stripe");
 
 // Test GET API
@@ -13,6 +14,9 @@ router.post("/test-post-api", test.indexPost);
 // Auth
 router.post("/login", auth.login);
 router.post("/sign-up", auth.signUp);
+
+//User
+router.post("/get-user", user.findUser);
 
 // Stripe
 router.post("/create-stripe-checkout", stripe.createCheckout);
