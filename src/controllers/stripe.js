@@ -230,6 +230,97 @@ subscriptionDeleted = async (req, res) => {
   }
 };
 
+customerPaymentMethod = async (req, res) => {
+  const { customerStripeId } = req.body;
+
+  const paymentMethods = await stripe.paymentMethods.list({
+    customer: customerStripeId,
+    type: "card",
+  });
+
+  return res.send({
+    statusCode: 200,
+    body: { paymentMethods },
+  });
+};
+
+customerInvoices = async (req, res) => {
+  const { customerStripeId } = req.body;
+
+  const invoices = await stripe.invoices.list({
+    customer: customerStripeId,
+    limit: 1,
+  });
+
+  return res.send({
+    statusCode: 200,
+    body: { invoices },
+  });
+};
+
+cancelSubscription = async (req, res) => {
+  const { userStripeId } = req.body;
+
+  const subscriptions = await stripe.subscriptions.list({
+    customer: userStripeId,
+  });
+
+  if (subscriptions.data[0].cancel_at_period_end) {
+    return res.send({
+      statusCode: 200,
+      body: {
+        error: "1",
+        message: "Du har allerede afmeldt dit abonnement.",
+      },
+    });
+  }
+
+  await subscriptions.data.forEach(async (element) => {
+    stripe.subscriptions.update(element.id, { cancel_at_period_end: true });
+  });
+
+  return res.send({
+    statusCode: 200,
+    body: {
+      error: "0",
+      message:
+        "Dit abonnement er nu afmeldt, det stopper automatisk ved udløb af abonnementsperioden. Du modtager ikke flere regninger.",
+    },
+  });
+};
+
+setupIntent = async (req, res) => {
+  const { userStripeId } = req.body;
+
+  const intent = await stripe.setupIntents.create({
+    customer: userStripeId,
+  });
+
+  return res.send({
+    statusCode: 200,
+    body: { intent },
+  });
+};
+
+updatePaymentMethod = async (req, res) => {
+  const { us, pm } = req.body;
+
+  const paymentMethod = await stripe.paymentMethods.attach(pm, {
+    customer: us,
+  });
+
+  const customer = await stripe.customers.update(us, {
+    invoice_settings: {
+      default_payment_method: pm,
+    },
+  });
+
+  return res.send({
+    statusCode: 200,
+    body: { paymentMethod },
+  });
+};
+
 async function updateUser(
   connection,
   stripeId,
@@ -281,4 +372,9 @@ module.exports = {
   createCheckout,
   checkoutComplete,
   subscriptionDeleted,
+  customerPaymentMethod,
+  customerInvoices,
+  cancelSubscription,
+  setupIntent,
+  updatePaymentMethod,
 };

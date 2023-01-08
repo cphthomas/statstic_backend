@@ -17,9 +17,15 @@ router.post("/sign-up", auth.signUp);
 
 //User
 router.post("/get-user", user.findUser);
+router.post("/change-password", user.changePassword);
 
 // Stripe
 router.post("/create-stripe-checkout", stripe.createCheckout);
+router.post("/customer-payment-method", stripe.customerPaymentMethod);
+router.post("/customer-invoices", stripe.customerInvoices);
+router.post("/cancel-subscription", stripe.cancelSubscription);
+router.post("/setup-intent", stripe.setupIntent);
+router.post("/update-payment-method", stripe.updatePaymentMethod);
 router.post(
   "/checkout-complete",
   express.raw({ type: "application/json" }),
