@@ -3,10 +3,10 @@ const stripe = require("stripe")("sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l");
 
 const connection = require("serverless-mysql")({
   config: {
-    host: "lmc8ixkebgaq22lo.chr7pe7iynqr.eu-west-1.rds.amazonaws.com",
-    database: "yj4gfzv5wypf9871",
-    user: "ub4b7vh6mgd73b2b",
-    password: "l7w4d31in0msovsc",
+    host: "164.92.213.12",
+    database: "books",
+    user: "thomas",
+    password: "1Thomas@stat",
   },
 });
 
