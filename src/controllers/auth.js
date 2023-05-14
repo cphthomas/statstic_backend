@@ -1,5 +1,13 @@
 let uniqid = require("uniqid");
-const { dbConfig } = require("../constants");
+const {
+  dbConfig,
+  STAT_SK_KEY,
+  JURA_SK_KEY,
+  STAT_BOOK_NAME,
+  JURA_BOOK_NAME,
+  STAT_BOOK_PRICES,
+  JURA_BOOK_PRICES,
+} = require("../constants");
 const Stripe = require("stripe");
 
 const connection = require("serverless-mysql")({
@@ -31,7 +39,12 @@ login = async (req, res) => {
     }
     userIp = await uniqid();
 
-    await updateUser(connection, existUserResult[0].user_email, userIp, bookToAccess);
+    await updateUser(
+      connection,
+      existUserResult[0].user_email,
+      userIp,
+      bookToAccess
+    );
 
     await connection.end();
   } catch (e) {
@@ -60,10 +73,23 @@ signUp = async (req, res) => {
   let existUserResult;
   userIp = "";
   let customer;
-  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
+  let skKey = "";
+  let freePrice = "";
+  if (bookToAccess === STAT_BOOK_NAME) {
+    skKey = STAT_SK_KEY;
+    freePrice = STAT_BOOK_PRICES[0];
+  } else if (bookToAccess === JURA_BOOK_NAME) {
+    skKey = JURA_SK_KEY;
+    freePrice = JURA_BOOK_PRICES[0];
+  }
+  const stripe = new Stripe(skKey);
   try {
     await connection.connect();
-    existUserResult = await getUserDetailByEmail(connection, email, bookToAccess);
+    existUserResult = await getUserDetailByEmail(
+      connection,
+      email,
+      bookToAccess
+    );
     if (existUserResult[0] && existUserResult[0].user_email) {
       await connection.end();
       return res.send({
@@ -82,7 +108,7 @@ signUp = async (req, res) => {
     // subscribe the new customer to the free plan
     const createdSubscription = await stripe.subscriptions.create({
       customer: customer.id,
-      items: [{ price: "price_1JG5QWCzlGux4vukFQ7r6q5Y" }],
+      items: [{ price: freePrice }],
     });
 
     // update subscription, pause payment
@@ -148,7 +174,12 @@ async function getUserDetailByEmail(connection, email, bookToAccess) {
   });
 }
 
-async function getUserDetailByEmailAndPassword(connection, email, password, bookToAccess) {
+async function getUserDetailByEmailAndPassword(
+  connection,
+  email,
+  password,
+  bookToAccess
+) {
   return new Promise((resolve, reject) => {
     connection.query(
       {

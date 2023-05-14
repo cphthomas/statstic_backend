@@ -1,4 +1,17 @@
-const { dbConfig } = require("../constants");
+const {
+  dbConfig,
+  STAT_SK_KEY,
+  STAT_SUBSCRIPTION_DELETE_WEBHOOK,
+  JURA_SK_KEY,
+  JURA_CHECKOUT_WEBHOOK,
+  JURA_SUBSCRIPTION_DELETE_WEBHOOK,
+  STAT_BOOK_NAME,
+  JURA_BOOK_NAME,
+  STAT_BOOK_URL,
+  JURA_BOOK_URL,
+  STAT_BOOK_PRICES,
+  JURA_BOOK_PRICES,
+} = require("../constants");
 
 const Stripe = require("stripe");
 const connection = require("serverless-mysql")({
@@ -6,35 +19,62 @@ const connection = require("serverless-mysql")({
 });
 
 createCheckout = async (req, res) => {
-  const { email, customerId, planType } = req.body;
-  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
+  const { email, customerId, planType, bookToAccess } = req.body;
+  let skKey = "";
+  let proPrice = "";
+  let premiumPrice = "";
+  let monthlySixtyPrice = "";
+  let sixMonthOneTimePrice = "";
+  let twelveMonthOneTimePrice = "";
+  let twentyFourMonthOneTimePrice = "";
+  let bookURL = "";
+  if (bookToAccess === STAT_BOOK_NAME) {
+    skKey = STAT_SK_KEY;
+    proPrice = STAT_BOOK_PRICES[1];
+    premiumPrice = STAT_BOOK_PRICES[2];
+    monthlySixtyPrice = STAT_BOOK_PRICES[3];
+    sixMonthOneTimePrice = STAT_BOOK_PRICES[4];
+    twelveMonthOneTimePrice = STAT_BOOK_PRICES[5];
+    twentyFourMonthOneTimePrice = STAT_BOOK_PRICES[6];
+    bookURL = STAT_BOOK_URL;
+  } else if (bookToAccess === JURA_BOOK_NAME) {
+    skKey = JURA_SK_KEY;
+    proPrice = JURA_BOOK_PRICES[1];
+    premiumPrice = JURA_BOOK_PRICES[2];
+    monthlySixtyPrice = JURA_BOOK_PRICES[3];
+    sixMonthOneTimePrice = JURA_BOOK_PRICES[4];
+    twelveMonthOneTimePrice = JURA_BOOK_PRICES[5];
+    twentyFourMonthOneTimePrice = JURA_BOOK_PRICES[6];
+    bookURL = JURA_BOOK_URL;
+  }
+  const stripe = new Stripe(skKey);
 
   let price = "";
   let mode = "";
   if (planType == "pro") {
-    price = "price_1JG5RUCzlGux4vukvLMkjRmC";
+    price = proPrice;
     mode = "subscription";
   } else if (planType == "premium") {
-    price = "price_1JG5SZCzlGux4vukHzvKvoVs";
+    price = premiumPrice;
     mode = "subscription";
   } else if (planType == "monthly_sixty") {
-    price = "price_1LPTKzCzlGux4vukN3IZ6pAK";
+    price = monthlySixtyPrice;
     mode = "subscription";
   } else if (planType == "six_months_one_time") {
-    price = "price_1LPTMUCzlGux4vukG5A78THC";
+    price = sixMonthOneTimePrice;
     mode = "payment";
   } else if (planType == "twelve_months_one_time") {
-    price = "price_1LPTP2CzlGux4vuknzCP892m";
+    price = twelveMonthOneTimePrice;
     mode = "payment";
   } else if (planType == "twenty_four_months_one_time") {
-    price = "price_1LPTQWCzlGux4vukLJibjtcp";
+    price = twentyFourMonthOneTimePrice;
     mode = "payment";
   }
 
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
-    success_url: "http://stat.tepdu.com/",
-    cancel_url: "http://stat.tepdu.com/",
+    success_url: bookURL,
+    cancel_url: bookURL,
     payment_method_types: ["card"],
     line_items: [{ price: price, quantity: 1 }],
     mode: mode,
@@ -47,14 +87,236 @@ createCheckout = async (req, res) => {
   });
 };
 
-// checkoutComplete = async ({ body, headers }, context) => {
-checkoutComplete = async (req, res) => {
-  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
+checkoutCompleteStat = async (req, res) => {
+  checkoutComplete(
+    req,
+    res,
+    STAT_SK_KEY,
+    STAT_CHECKOUT_WEBHOOK,
+    STAT_BOOK_NAME
+  );
+};
+
+subscriptionDeletedStat = async (req, res) => {
+  subscriptionDeleted(
+    req,
+    res,
+    STAT_SK_KEY,
+    STAT_SUBSCRIPTION_DELETE_WEBHOOK,
+    STAT_BOOK_NAME,
+    STAT_BOOK_PRICES
+  );
+};
+
+checkoutCompleteJura = async (req, res) => {
+  checkoutComplete(
+    req,
+    res,
+    JURA_SK_KEY,
+    JURA_CHECKOUT_WEBHOOK,
+    JURA_BOOK_NAME
+  );
+};
+
+subscriptionDeletedJura = async (req, res) => {
+  subscriptionDeleted(
+    req,
+    res,
+    JURA_SK_KEY,
+    JURA_SUBSCRIPTION_DELETE_WEBHOOK,
+    JURA_BOOK_NAME,
+    JURA_BOOK_PRICES
+  );
+};
+
+customerPaymentMethod = async (req, res) => {
+  const { customerStripeId, bookToAccess } = req.body;
+
+  let skKey = "";
+  if (bookToAccess === STAT_BOOK_NAME) {
+    skKey = STAT_SK_KEY;
+  } else if (bookToAccess === JURA_BOOK_NAME) {
+    skKey = JURA_SK_KEY;
+  }
+  const stripe = new Stripe(skKey);
+
+  const paymentMethods = await stripe.paymentMethods.list({
+    customer: customerStripeId,
+    type: "card",
+  });
+
+  return res.send({
+    statusCode: 200,
+    body: { paymentMethods },
+  });
+};
+
+customerInvoices = async (req, res) => {
+  const { customerStripeId, bookToAccess } = req.body;
+
+  let skKey = "";
+  if (bookToAccess === STAT_BOOK_NAME) {
+    skKey = STAT_SK_KEY;
+  } else if (bookToAccess === JURA_BOOK_NAME) {
+    skKey = JURA_SK_KEY;
+  }
+  const stripe = new Stripe(skKey);
+
+  const invoices = await stripe.invoices.list({
+    customer: customerStripeId,
+    limit: 1,
+  });
+
+  return res.send({
+    statusCode: 200,
+    body: { invoices },
+  });
+};
+
+cancelSubscription = async (req, res) => {
+  const { userStripeId, bookToAccess } = req.body;
+
+  let skKey = "";
+  if (bookToAccess === STAT_BOOK_NAME) {
+    skKey = STAT_SK_KEY;
+  } else if (bookToAccess === JURA_BOOK_NAME) {
+    skKey = JURA_SK_KEY;
+  }
+  const stripe = new Stripe(skKey);
+
+  const subscriptions = await stripe.subscriptions.list({
+    customer: userStripeId,
+  });
+
+  if (subscriptions.data[0].cancel_at_period_end) {
+    return res.send({
+      statusCode: 200,
+      body: {
+        error: "1",
+        message: "Du har allerede afmeldt dit abonnement.",
+      },
+    });
+  }
+
+  await subscriptions.data.forEach(async (element) => {
+    stripe.subscriptions.update(element.id, { cancel_at_period_end: true });
+  });
+
+  return res.send({
+    statusCode: 200,
+    body: {
+      error: "0",
+      message:
+        "Dit abonnement er nu afmeldt, det stopper automatisk ved udløb af abonnementsperioden. Du modtager ikke flere regninger.",
+    },
+  });
+};
+
+setupIntent = async (req, res) => {
+  const { userStripeId, bookToAccess } = req.body;
+
+  let skKey = "";
+  if (bookToAccess === STAT_BOOK_NAME) {
+    skKey = STAT_SK_KEY;
+  } else if (bookToAccess === JURA_BOOK_NAME) {
+    skKey = JURA_SK_KEY;
+  }
+  const stripe = new Stripe(skKey);
+
+  const intent = await stripe.setupIntents.create({
+    customer: userStripeId,
+  });
+
+  return res.send({
+    statusCode: 200,
+    body: { intent },
+  });
+};
+
+updatePaymentMethod = async (req, res) => {
+  const { us, pm, bookToAccess } = req.body;
+
+  let skKey = "";
+  if (bookToAccess === STAT_BOOK_NAME) {
+    skKey = STAT_SK_KEY;
+  } else if (bookToAccess === JURA_BOOK_NAME) {
+    skKey = JURA_SK_KEY;
+  }
+  const stripe = new Stripe(skKey);
+
+  const paymentMethod = await stripe.paymentMethods.attach(pm, {
+    customer: us,
+  });
+
+  const customer = await stripe.customers.update(us, {
+    invoice_settings: {
+      default_payment_method: pm,
+    },
+  });
+
+  return res.send({
+    statusCode: 200,
+    body: { paymentMethod },
+  });
+};
+
+async function updateUser(
+  connection,
+  stripeId,
+  planEnd,
+  planStart,
+  plan,
+  stripeEmail,
+  paymentIntent,
+  bookToAccess
+) {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      {
+        sql: "UPDATE external_users SET plan_id = ?, user_subscription_end = ?, user_subscription_start = ?, stripe_mail = ?, payment_intent = ?, book_access = ? WHERE stripe_id = ?",
+        timeout: 10000,
+        values: [
+          plan,
+          planEnd,
+          planStart,
+          stripeEmail,
+          paymentIntent,
+          bookToAccess,
+          stripeId,
+        ],
+      },
+      function (error, results, fields) {
+        if (error) reject(err);
+        resolve(results);
+      }
+    );
+  });
+}
+
+async function updateUserDelete(connection, stripeId, plan, bookToAccess) {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      {
+        sql: "UPDATE external_users SET plan_id = ?, book_access = ? WHERE stripe_id = ?",
+        timeout: 10000,
+        values: [plan, bookToAccess, stripeId],
+      },
+      function (error, results, fields) {
+        if (error) reject(err);
+        resolve(results);
+      }
+    );
+  });
+}
+
+async function checkoutComplete(req, res, skKey, signature) {
+  const stripe = new Stripe(skKey);
+
   try {
     const stripeEvent = await stripe.webhooks.constructEvent(
       req.body,
       req.headers["stripe-signature"],
-      "whsec_jgmjekj4G4Jtln0Hr4MpbjVsFdmlBWev"
+      signature
     );
 
     if (stripeEvent.type !== "checkout.session.completed") return;
@@ -116,19 +378,11 @@ checkoutComplete = async (req, res) => {
         status: 200,
         body: { received: subscription.customer },
       });
-      // return {
-      //   statusCode: 200,
-      //   body: JSON.stringify({ received: subscription.customer }),
-      // };
     } catch (error) {
       return res.send({
         status: 400,
         body: `Webhook Error: ${error.message}`,
       });
-      // return {
-      //   statusCode: 400,
-      //   body: `Webhook Error: ${error.message}`,
-      // };
     } finally {
       if (connection) {
         await connection.end();
@@ -137,24 +391,27 @@ checkoutComplete = async (req, res) => {
   } catch (err) {
     console.log(err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
-    // return {
-    //   statusCode: 400,
-    //   body: `Webhook Error: ${err.message}`,
-    // };
   } finally {
     if (connection) {
       await connection.end();
     }
   }
-};
+}
 
-subscriptionDeleted = async (req, res) => {
-  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
+async function subscriptionDeleted(
+  req,
+  res,
+  skKey,
+  signature,
+  bookToAccess,
+  prices
+) {
+  const stripe = new Stripe(skKey);
   try {
     const stripeEvent = await stripe.webhooks.constructEvent(
       req.body,
       req.headers["stripe-signature"],
-      "whsec_jOwO2ytLcWZoTWe1NGQt82Rab5K2zxJu"
+      signature
     );
     if (stripeEvent.type !== "customer.subscription.deleted") return;
 
@@ -171,19 +428,19 @@ subscriptionDeleted = async (req, res) => {
       let newPlan = 0;
       await userAllSubscriptions.data.forEach(async (element) => {
         if (element.status == "active" && element.pause_collection == null) {
-          if (element.plan.id == "price_1JG5QWCzlGux4vukFQ7r6q5Y") {
+          if (element.plan.id == prices[0]) {
             newPlan = 0;
-          } else if (element.plan.id == "price_1JG5RUCzlGux4vukvLMkjRmC") {
+          } else if (element.plan.id == prices[1]) {
             newPlan = 1;
-          } else if (element.plan.id == "price_1JG5SZCzlGux4vukHzvKvoVs") {
+          } else if (element.plan.id == prices[2]) {
             newPlan = 2;
-          } else if (element.plan.id == "price_1LPTKzCzlGux4vukN3IZ6pAK") {
+          } else if (element.plan.id == prices[3]) {
             newPlan = 3;
-          } else if (element.plan.id == "price_1LPTMUCzlGux4vukG5A78THC") {
+          } else if (element.plan.id == prices[4]) {
             newPlan = 4;
-          } else if (element.plan.id == "price_1LPTP2CzlGux4vuknzCP892m") {
+          } else if (element.plan.id == prices[5]) {
             newPlan = 5;
-          } else if (element.plan.id == "price_1LPTQWCzlGux4vukLJibjtcp") {
+          } else if (element.plan.id == prices[6]) {
             newPlan = 6;
           }
         } else {
@@ -191,7 +448,12 @@ subscriptionDeleted = async (req, res) => {
         }
       });
 
-      await updateUserDelete(connection, subscription.customer, newPlan);
+      await updateUserDelete(
+        connection,
+        subscription.customer,
+        newPlan,
+        bookToAccess
+      );
 
       await connection.end();
 
@@ -199,20 +461,11 @@ subscriptionDeleted = async (req, res) => {
         status: 200,
         body: { received: subscription.customer },
       });
-
-      // return {
-      //   statusCode: 200,
-      //   body: JSON.stringify({ received: subscription.customer }),
-      // };
     } catch (error) {
       return res.send({
         status: 400,
         body: `Webhook Error: ${error.message}`,
       });
-      // return {
-      //   statusCode: 400,
-      //   body: `Webhook Error: ${error.message}`,
-      // };
     } finally {
       if (connection) {
         connection.end();
@@ -223,160 +476,15 @@ subscriptionDeleted = async (req, res) => {
       status: 400,
       body: `Webhook Error: ${error.message}`,
     });
-    // return {
-    //   statusCode: 400,
-    //   body: `Webhook Error: ${error.message}`,
-    // };
   }
-};
-
-customerPaymentMethod = async (req, res) => {
-  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
-  const { customerStripeId } = req.body;
-
-  const paymentMethods = await stripe.paymentMethods.list({
-    customer: customerStripeId,
-    type: "card",
-  });
-
-  return res.send({
-    statusCode: 200,
-    body: { paymentMethods },
-  });
-};
-
-customerInvoices = async (req, res) => {
-  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
-  const { customerStripeId } = req.body;
-
-  const invoices = await stripe.invoices.list({
-    customer: customerStripeId,
-    limit: 1,
-  });
-
-  return res.send({
-    statusCode: 200,
-    body: { invoices },
-  });
-};
-
-cancelSubscription = async (req, res) => {
-  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
-  const { userStripeId } = req.body;
-
-  const subscriptions = await stripe.subscriptions.list({
-    customer: userStripeId,
-  });
-
-  if (subscriptions.data[0].cancel_at_period_end) {
-    return res.send({
-      statusCode: 200,
-      body: {
-        error: "1",
-        message: "Du har allerede afmeldt dit abonnement.",
-      },
-    });
-  }
-
-  await subscriptions.data.forEach(async (element) => {
-    stripe.subscriptions.update(element.id, { cancel_at_period_end: true });
-  });
-
-  return res.send({
-    statusCode: 200,
-    body: {
-      error: "0",
-      message:
-        "Dit abonnement er nu afmeldt, det stopper automatisk ved udløb af abonnementsperioden. Du modtager ikke flere regninger.",
-    },
-  });
-};
-
-setupIntent = async (req, res) => {
-  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
-  const { userStripeId } = req.body;
-
-  const intent = await stripe.setupIntents.create({
-    customer: userStripeId,
-  });
-
-  return res.send({
-    statusCode: 200,
-    body: { intent },
-  });
-};
-
-updatePaymentMethod = async (req, res) => {
-  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
-  const { us, pm } = req.body;
-
-  const paymentMethod = await stripe.paymentMethods.attach(pm, {
-    customer: us,
-  });
-
-  const customer = await stripe.customers.update(us, {
-    invoice_settings: {
-      default_payment_method: pm,
-    },
-  });
-
-  return res.send({
-    statusCode: 200,
-    body: { paymentMethod },
-  });
-};
-
-async function updateUser(
-  connection,
-  stripeId,
-  planEnd,
-  planStart,
-  plan,
-  stripeEmail,
-  paymentIntent
-) {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      {
-        sql: "UPDATE external_users SET plan_id = ?, user_subscription_end = ?, user_subscription_start = ?, stripe_mail = ?, payment_intent = ? WHERE stripe_id = ?",
-        timeout: 10000,
-        values: [
-          plan,
-          planEnd,
-          planStart,
-          stripeEmail,
-          paymentIntent,
-          stripeId,
-        ],
-      },
-      function (error, results, fields) {
-        if (error) reject(err);
-        resolve(results);
-      }
-    );
-  });
-}
-
-async function updateUserDelete(connection, stripeId, plan) {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      {
-        sql: "UPDATE external_users SET plan_id = ? WHERE stripe_id = ?",
-        timeout: 10000,
-        values: [plan, stripeId],
-      },
-      function (error, results, fields) {
-        if (error) reject(err);
-        resolve(results);
-      }
-    );
-  });
 }
 
 module.exports = {
   createCheckout,
-  checkoutComplete,
-  subscriptionDeleted,
+  checkoutCompleteStat,
+  subscriptionDeletedStat,
+  checkoutCompleteJura,
+  subscriptionDeletedJura,
   customerPaymentMethod,
   customerInvoices,
   cancelSubscription,

@@ -29,12 +29,22 @@ router.post("/update-payment-method", stripe.updatePaymentMethod);
 router.post(
   "/checkout-complete",
   express.raw({ type: "application/json" }),
-  stripe.checkoutComplete
+  stripe.checkoutCompleteStat
 );
 router.post(
   "/subscription-deleted",
   express.raw({ type: "application/json" }),
-  stripe.subscriptionDeleted
+  stripe.subscriptionDeletedStat
+);
+router.post(
+  "/checkout-complete-jura",
+  express.raw({ type: "application/json" }),
+  stripe.checkoutCompleteJura
+);
+router.post(
+  "/subscription-deleted-jura",
+  express.raw({ type: "application/json" }),
+  stripe.subscriptionDeletedJura
 );
 
 module.exports = router;
