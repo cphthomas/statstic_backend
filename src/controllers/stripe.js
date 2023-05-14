@@ -1,15 +1,13 @@
-const stripe = require("stripe")("sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l");
+const { dbConfig } = require("../constants");
+
+const Stripe = require("stripe");
 const connection = require("serverless-mysql")({
-  config: {
-    host: "164.92.213.12",
-    database: "books",
-    user: "thomas",
-    password: "1Thomas@stat",
-  },
+  config: dbConfig,
 });
 
 createCheckout = async (req, res) => {
   const { email, customerId, planType } = req.body;
+  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
 
   let price = "";
   let mode = "";
@@ -51,6 +49,7 @@ createCheckout = async (req, res) => {
 
 // checkoutComplete = async ({ body, headers }, context) => {
 checkoutComplete = async (req, res) => {
+  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
   try {
     const stripeEvent = await stripe.webhooks.constructEvent(
       req.body,
@@ -150,6 +149,7 @@ checkoutComplete = async (req, res) => {
 };
 
 subscriptionDeleted = async (req, res) => {
+  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
   try {
     const stripeEvent = await stripe.webhooks.constructEvent(
       req.body,
@@ -231,6 +231,7 @@ subscriptionDeleted = async (req, res) => {
 };
 
 customerPaymentMethod = async (req, res) => {
+  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
   const { customerStripeId } = req.body;
 
   const paymentMethods = await stripe.paymentMethods.list({
@@ -245,6 +246,7 @@ customerPaymentMethod = async (req, res) => {
 };
 
 customerInvoices = async (req, res) => {
+  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
   const { customerStripeId } = req.body;
 
   const invoices = await stripe.invoices.list({
@@ -259,6 +261,7 @@ customerInvoices = async (req, res) => {
 };
 
 cancelSubscription = async (req, res) => {
+  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
   const { userStripeId } = req.body;
 
   const subscriptions = await stripe.subscriptions.list({
@@ -290,6 +293,7 @@ cancelSubscription = async (req, res) => {
 };
 
 setupIntent = async (req, res) => {
+  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
   const { userStripeId } = req.body;
 
   const intent = await stripe.setupIntents.create({
@@ -303,6 +307,7 @@ setupIntent = async (req, res) => {
 };
 
 updatePaymentMethod = async (req, res) => {
+  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
   const { us, pm } = req.body;
 
   const paymentMethod = await stripe.paymentMethods.attach(pm, {

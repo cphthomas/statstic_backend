@@ -1,19 +1,16 @@
+const { dbConfig } = require("../constants");
+
 const connection = require("serverless-mysql")({
-  config: {
-    host: "164.92.213.12",
-    database: "books",
-    user: "thomas",
-    password: "1Thomas@stat",
-  },
+  config: dbConfig,
 });
 
 findUser = async (req, res) => {
-  const { userEmail } = req.body;
+  const { userEmail, bookToAccess } = req.body;
 
   let user = "";
   try {
     await connection.connect();
-    user = await getUser(connection, userEmail);
+    user = await getUser(connection, userEmail, bookToAccess);
     await connection.end();
   } catch (e) {
     console.log(`User not found due to error= ${e}`);
@@ -68,13 +65,13 @@ changePassword = async (req, res) => {
   });
 };
 
-async function getUser(connection, email) {
+async function getUser(connection, email, bookToAccess) {
   return new Promise((resolve, reject) => {
     connection.query(
       {
         sql: "SELECT * FROM `external_users` WHERE `user_email` = ? AND `book_access` = ?",
         timeout: 10000,
-        values: [email, "Test"],
+        values: [email, bookToAccess],
       },
       function (error, results, fields) {
         if (error) reject(error);

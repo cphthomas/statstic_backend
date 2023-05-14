@@ -1,17 +1,13 @@
 let uniqid = require("uniqid");
-const stripe = require("stripe")("sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l");
+const { dbConfig } = require("../constants");
+const Stripe = require("stripe");
 
 const connection = require("serverless-mysql")({
-  config: {
-    host: "164.92.213.12",
-    database: "books",
-    user: "thomas",
-    password: "1Thomas@stat",
-  },
+  config: dbConfig,
 });
 
 login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, bookToAccess } = req.body;
 
   let existUserResult;
   let userIp = "";
@@ -20,7 +16,8 @@ login = async (req, res) => {
     existUserResult = await getUserDetailByEmailAndPassword(
       connection,
       email,
-      password
+      password,
+      bookToAccess
     );
     if (!existUserResult[0]) {
       await connection.end();
@@ -34,7 +31,7 @@ login = async (req, res) => {
     }
     userIp = await uniqid();
 
-    await updateUser(connection, existUserResult[0].user_email, userIp);
+    await updateUser(connection, existUserResult[0].user_email, userIp, bookToAccess);
 
     await connection.end();
   } catch (e) {
@@ -59,14 +56,14 @@ login = async (req, res) => {
 };
 
 signUp = async (req, res) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, bookToAccess } = req.body;
   let existUserResult;
   userIp = "";
   let customer;
-
+  const stripe = new Stripe('sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l');
   try {
     await connection.connect();
-    existUserResult = await getUserDetailByEmail(connection, email);
+    existUserResult = await getUserDetailByEmail(connection, email, bookToAccess);
     if (existUserResult[0] && existUserResult[0].user_email) {
       await connection.end();
       return res.send({
@@ -103,7 +100,7 @@ signUp = async (req, res) => {
       plan_id: "0",
       is_logged_in: 1,
       user_ip: userIp,
-      book_access: "Test",
+      book_access: bookToAccess,
     };
     try {
       let query = await connection.query({
@@ -135,13 +132,13 @@ signUp = async (req, res) => {
   });
 };
 
-async function getUserDetailByEmail(connection, email) {
+async function getUserDetailByEmail(connection, email, bookToAccess) {
   return new Promise((resolve, reject) => {
     connection.query(
       {
         sql: "SELECT * FROM `external_users` WHERE `user_email` = ? AND `book_access` = ?",
         timeout: 10000,
-        values: [email, "Test"],
+        values: [email, bookToAccess],
       },
       function (error, results, fields) {
         if (error) reject(err);
@@ -151,13 +148,13 @@ async function getUserDetailByEmail(connection, email) {
   });
 }
 
-async function getUserDetailByEmailAndPassword(connection, email, password) {
+async function getUserDetailByEmailAndPassword(connection, email, password, bookToAccess) {
   return new Promise((resolve, reject) => {
     connection.query(
       {
         sql: "SELECT * FROM `external_users` WHERE `user_email` = ? AND `user_password` = ? AND `book_access` = ?",
         timeout: 10000,
-        values: [email, password, "Test"],
+        values: [email, password, bookToAccess],
       },
       function (error, results, fields) {
         if (error) reject(err);
@@ -167,13 +164,13 @@ async function getUserDetailByEmailAndPassword(connection, email, password) {
   });
 }
 
-async function updateUser(connection, userEmail, userIp) {
+async function updateUser(connection, userEmail, userIp, bookToAccess) {
   return new Promise((resolve, reject) => {
     connection.query(
       {
         sql: "UPDATE external_users SET user_ip = ? WHERE user_email = ? AND `book_access` = ?",
         timeout: 10000,
-        values: [userIp, userEmail, "Test"],
+        values: [userIp, userEmail, bookToAccess],
       },
       function (error, results, fields) {
         if (error) reject(err);
