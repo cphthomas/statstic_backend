@@ -24,7 +24,9 @@ app.use((req, res, next) => {
   console.log("req.originalUrl",req.originalUrl)
   if (
     req.originalUrl === "/app/api/checkout-complete" ||
-    req.originalUrl === "/app/api/subscription-deleted"
+    req.originalUrl === "/app/api/subscription-deleted" ||
+    req.originalUrl === "/app/api/checkout-complete-jura" ||
+    req.originalUrl === "/app/api/subscription-deleted-jura"
   ) {
     next();
   } else {
