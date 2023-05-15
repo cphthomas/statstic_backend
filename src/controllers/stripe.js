@@ -309,7 +309,7 @@ async function updateUserDelete(connection, stripeId, plan, bookToAccess) {
   });
 }
 
-async function checkoutComplete(req, res, skKey, signature) {
+async function checkoutComplete(req, res, skKey, signature, bookToAccess) {
   const stripe = new Stripe(skKey);
 
   try {
@@ -358,7 +358,8 @@ async function checkoutComplete(req, res, skKey, signature) {
         subscriptionStart,
         plan,
         subscription.customer_details.email,
-        paymentIntent
+        paymentIntent,
+        bookToAccess
       );
 
       await connection.end();
