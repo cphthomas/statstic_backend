@@ -109,13 +109,100 @@ subscriptionDeletedStat = async (req, res) => {
 };
 
 checkoutCompleteJura = async (req, res) => {
-  checkoutComplete(
-    req,
-    res,
-    JURA_SK_KEY,
-    JURA_CHECKOUT_WEBHOOK,
-    JURA_BOOK_NAME
-  );
+  // checkoutComplete(
+  //   req,
+  //   res,
+  //   JURA_SK_KEY,
+  //   JURA_CHECKOUT_WEBHOOK,
+  //   JURA_BOOK_NAME
+  // );
+  const stripe = new Stripe(JURA_SK_KEY);
+
+  try {
+    const stripeEvent = await stripe.webhooks.constructEvent(
+      req.body,
+      req.headers["stripe-signature"],
+      JURA_CHECKOUT_WEBHOOK
+    );
+
+    if (stripeEvent.type !== "checkout.session.completed") return;
+
+    const subscription = await stripeEvent.data.object;
+    const newSubscriptionId = await subscription.subscription;
+    const paymentIntent = await subscription.payment_intent;
+    const subscriptionStart = Date.now();
+    let subscriptionEnd = "";
+
+    let plan = "0";
+    if (subscription.amount_total == "4900") {
+      plan = "1";
+      subscriptionEnd = Date.now();
+    } else if (subscription.amount_total == "6900") {
+      plan = "2";
+      subscriptionEnd = Date.now();
+    } else if (subscription.amount_total == "5900") {
+      plan = "3";
+      subscriptionEnd = Date.now();
+    } else if (subscription.amount_total == "29000") {
+      plan = "4";
+      subscriptionEnd = subscriptionStart + 1000 * 60 * 60 * 24 * 180;
+    } else if (subscription.amount_total == "39000") {
+      plan = "5";
+      subscriptionEnd = subscriptionStart + 1000 * 60 * 60 * 24 * 360;
+    } else if (subscription.amount_total == "54000") {
+      plan = "6";
+      subscriptionEnd = subscriptionStart + 1000 * 60 * 60 * 24 * 720;
+    }
+
+    try {
+      await connection.connect();
+
+      await updateUser(
+        connection,
+        subscription.customer,
+        subscriptionEnd,
+        subscriptionStart,
+        plan,
+        subscription.customer_details.email,
+        paymentIntent,
+        JURA_BOOK_NAME
+      );
+
+      await connection.end();
+
+      const userAllSubscriptions = await stripe.subscriptions.list({
+        customer: subscription.customer,
+      });
+
+      await userAllSubscriptions.data.forEach(async (element) => {
+        if (element.id != newSubscriptionId) {
+          stripe.subscriptions.update(element.id, {
+            pause_collection: { behavior: "mark_uncollectible" },
+          });
+        }
+      });
+      return res.send({
+        status: 200,
+        body: { received: subscription.customer },
+      });
+    } catch (error) {
+      return res.send({
+        status: 400,
+        body: `Webhook Error: ${error.message}`,
+      });
+    } finally {
+      if (connection) {
+        await connection.end();
+      }
+    }
+  } catch (err) {
+    console.log(err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
+  }
 };
 
 subscriptionDeletedJura = async (req, res) => {
