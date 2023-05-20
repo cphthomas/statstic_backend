@@ -98,7 +98,7 @@ checkoutCompleteStat = async (req, res) => {
 };
 
 subscriptionDeletedStat = async (req, res) => {
-  subscriptionDeleted(
+  await subscriptionDeleted(
     req,
     res,
     STAT_SK_KEY,
@@ -109,7 +109,7 @@ subscriptionDeletedStat = async (req, res) => {
 };
 
 checkoutCompleteJura = async (req, res) => {
-  checkoutComplete(
+  await checkoutComplete(
     req,
     res,
     JURA_SK_KEY,
@@ -119,7 +119,7 @@ checkoutCompleteJura = async (req, res) => {
 };
 
 subscriptionDeletedJura = async (req, res) => {
-  subscriptionDeleted(
+  await subscriptionDeleted(
     req,
     res,
     JURA_SK_KEY,
