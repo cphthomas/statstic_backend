@@ -46,5 +46,15 @@ router.post(
   express.raw({ type: "application/json" }),
   stripe.subscriptionDeletedJura
 );
+router.post(
+  "/checkout-complete-esg",
+  express.raw({ type: "application/json" }),
+  stripe.checkoutCompleteEsg
+);
+router.post(
+  "/subscription-deleted-esg",
+  express.raw({ type: "application/json" }),
+  stripe.subscriptionDeletedEsg
+);
 
 module.exports = router;

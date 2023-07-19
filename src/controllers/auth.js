@@ -7,6 +7,9 @@ const {
   JURA_BOOK_NAME,
   STAT_BOOK_PRICES,
   JURA_BOOK_PRICES,
+  ESG_BOOK_NAME,
+  ESG_SK_KEY,
+  ESG_BOOK_PRICES,
 } = require("../constants");
 const Stripe = require("stripe");
 
@@ -81,6 +84,9 @@ signUp = async (req, res) => {
   } else if (bookToAccess === JURA_BOOK_NAME) {
     skKey = JURA_SK_KEY;
     freePrice = JURA_BOOK_PRICES[0];
+  } else if (bookToAccess === ESG_BOOK_NAME) {
+    skKey = ESG_SK_KEY;
+    freePrice = ESG_BOOK_PRICES[0];
   }
   const stripe = new Stripe(skKey);
   try {

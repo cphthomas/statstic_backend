@@ -25,7 +25,8 @@ const JURA_BOOK_NAME = "Jura";
 const JURA_BOOK_URL = "http://jura.tepdu.com/";
 const JURA_SK_KEY = "sk_test_oNMafQw2sfljLec3xk0pZSIi";
 const JURA_CHECKOUT_WEBHOOK = "whsec_ADdNeNh0OXxuFwDlRjCCHiAbdhjfllev";
-const JURA_SUBSCRIPTION_DELETE_WEBHOOK = "whsec_cYRKyEllo1OkmnQyTezGtEmBFt2QuwA7";
+const JURA_SUBSCRIPTION_DELETE_WEBHOOK =
+  "whsec_cYRKyEllo1OkmnQyTezGtEmBFt2QuwA7";
 JURA_BOOK_PRICES = [
   "price_1JIv6kJsPOEBHB7sW0ZkA4g9",
   "price_1JIv6GJsPOEBHB7sXNpbqizr",
@@ -34,6 +35,23 @@ JURA_BOOK_PRICES = [
   "price_1N7cgsJsPOEBHB7suWgwOOa0",
   "price_1N7cjbJsPOEBHB7sFEghVVIP",
   "price_1N7clbJsPOEBHB7sI4q4aSji",
+];
+
+const ESG_BOOK_NAME = "Esg";
+const ESG_BOOK_URL = "http://esg.tepdu.com/";
+const ESG_SK_KEY =
+  "sk_test_51JtdErCcBUqlBY9HNkvAeoSrR6jH7WviuW55Lnspmkl17hsyi8LKrm4xvfZCztkq2riLsdEmW6CHRMw44CtibrYV00DD01wNQ0";
+const ESG_CHECKOUT_WEBHOOK = "whsec_k5I3vWT9GEYE14C7Q1Lm2wIG8TTwOlvD";
+const ESG_SUBSCRIPTION_DELETE_WEBHOOK =
+  "whsec_3PAXTyE7GTquseBWHAd8OkWn5H8ut6oe";
+ESG_BOOK_PRICES = [
+  "price_1JttuGCcBUqlBY9HfICty6MA",
+  "price_1JttuVCcBUqlBY9HAyXUMCBL",
+  "price_1NVTsVCcBUqlBY9HnWyIb9Lv",
+  "price_1NVTuYCcBUqlBY9HoLPA6fl8",
+  "price_1NVTvGCcBUqlBY9HRfa7q6LM",
+  "price_1NVTvqCcBUqlBY9HyeM6RI3z",
+  "price_1NVTwPCcBUqlBY9Hd82s6df6",
 ];
 
 module.exports = {
@@ -50,4 +68,10 @@ module.exports = {
   JURA_CHECKOUT_WEBHOOK,
   JURA_SUBSCRIPTION_DELETE_WEBHOOK,
   JURA_BOOK_PRICES,
+  ESG_BOOK_NAME,
+  ESG_BOOK_URL,
+  ESG_SK_KEY,
+  ESG_CHECKOUT_WEBHOOK,
+  ESG_SUBSCRIPTION_DELETE_WEBHOOK,
+  ESG_BOOK_PRICES,
 };

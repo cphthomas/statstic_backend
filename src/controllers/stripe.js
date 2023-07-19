@@ -12,6 +12,12 @@ const {
   JURA_BOOK_URL,
   STAT_BOOK_PRICES,
   JURA_BOOK_PRICES,
+  ESG_SK_KEY,
+  ESG_CHECKOUT_WEBHOOK,
+  ESG_BOOK_NAME,
+  ESG_SUBSCRIPTION_DELETE_WEBHOOK,
+  ESG_BOOK_PRICES,
+  ESG_BOOK_URL,
 } = require("../constants");
 
 const Stripe = require("stripe");
@@ -47,6 +53,15 @@ createCheckout = async (req, res) => {
     twelveMonthOneTimePrice = JURA_BOOK_PRICES[5];
     twentyFourMonthOneTimePrice = JURA_BOOK_PRICES[6];
     bookURL = JURA_BOOK_URL;
+  } else if (bookToAccess === ESG_BOOK_NAME) {
+    skKey = ESG_SK_KEY;
+    proPrice = ESG_BOOK_PRICES[1];
+    premiumPrice = ESG_BOOK_PRICES[2];
+    monthlySixtyPrice = ESG_BOOK_PRICES[3];
+    sixMonthOneTimePrice = ESG_BOOK_PRICES[4];
+    twelveMonthOneTimePrice = ESG_BOOK_PRICES[5];
+    twentyFourMonthOneTimePrice = ESG_BOOK_PRICES[6];
+    bookURL = ESG_BOOK_URL;
   }
   const stripe = new Stripe(skKey);
 
@@ -130,6 +145,27 @@ subscriptionDeletedJura = async (req, res) => {
   );
 };
 
+checkoutCompleteEsg = async (req, res) => {
+  await checkoutComplete(
+    req,
+    res,
+    ESG_SK_KEY,
+    ESG_CHECKOUT_WEBHOOK,
+    ESG_BOOK_NAME
+  );
+};
+
+subscriptionDeletedEsg = async (req, res) => {
+  await subscriptionDeleted(
+    req,
+    res,
+    ESG_SK_KEY,
+    ESG_SUBSCRIPTION_DELETE_WEBHOOK,
+    ESG_BOOK_NAME,
+    ESG_BOOK_PRICES
+  );
+};
+
 customerPaymentMethod = async (req, res) => {
   const { customerStripeId, bookToAccess } = req.body;
 
@@ -138,6 +174,8 @@ customerPaymentMethod = async (req, res) => {
     skKey = STAT_SK_KEY;
   } else if (bookToAccess === JURA_BOOK_NAME) {
     skKey = JURA_SK_KEY;
+  } else if (bookToAccess === ESG_BOOK_NAME) {
+    skKey = ESG_SK_KEY;
   }
   const stripe = new Stripe(skKey);
 
@@ -160,7 +198,10 @@ customerInvoices = async (req, res) => {
     skKey = STAT_SK_KEY;
   } else if (bookToAccess === JURA_BOOK_NAME) {
     skKey = JURA_SK_KEY;
+  } else if (bookToAccess === ESG_BOOK_NAME) {
+    skKey = ESG_SK_KEY;
   }
+  console.log("skKey", skKey);
   const stripe = new Stripe(skKey);
 
   const invoices = await stripe.invoices.list({
@@ -182,6 +223,8 @@ cancelSubscription = async (req, res) => {
     skKey = STAT_SK_KEY;
   } else if (bookToAccess === JURA_BOOK_NAME) {
     skKey = JURA_SK_KEY;
+  } else if (bookToAccess === ESG_BOOK_NAME) {
+    skKey = ESG_SK_KEY;
   }
   const stripe = new Stripe(skKey);
 
@@ -221,6 +264,8 @@ setupIntent = async (req, res) => {
     skKey = STAT_SK_KEY;
   } else if (bookToAccess === JURA_BOOK_NAME) {
     skKey = JURA_SK_KEY;
+  } else if (bookToAccess === ESG_BOOK_NAME) {
+    skKey = ESG_SK_KEY;
   }
   const stripe = new Stripe(skKey);
 
@@ -242,6 +287,8 @@ updatePaymentMethod = async (req, res) => {
     skKey = STAT_SK_KEY;
   } else if (bookToAccess === JURA_BOOK_NAME) {
     skKey = JURA_SK_KEY;
+  } else if (bookToAccess === ESG_BOOK_NAME) {
+    skKey = ESG_SK_KEY;
   }
   const stripe = new Stripe(skKey);
 
@@ -492,4 +539,6 @@ module.exports = {
   cancelSubscription,
   setupIntent,
   updatePaymentMethod,
+  checkoutCompleteEsg,
+  subscriptionDeletedEsg,
 };
