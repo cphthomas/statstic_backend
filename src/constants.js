@@ -6,19 +6,20 @@ const dbConfig = {
 };
 
 const STAT_BOOK_NAME = "Statistik";
-const STAT_BOOK_URL = "http://stat.tepdu.com/";
-const STAT_SK_KEY = "sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l";
-const STAT_CHECKOUT_WEBHOOK = "whsec_jgmjekj4G4Jtln0Hr4MpbjVsFdmlBWev";
+const STAT_BOOK_URL = "https://s.tepedu.com/";
+// const STAT_SK_KEY = "sk_test_5fe6JJATRk7ErzfTyy2iYp2O00usmCOV2l";
+const STAT_SK_KEY = "sk_live_X0i7HSx2c4XujPyZAp36UZz0";
+const STAT_CHECKOUT_WEBHOOK = "whsec_AP6RS8npWZgkSoJeKuW3oxWsxRbfYZAW";
 const STAT_SUBSCRIPTION_DELETE_WEBHOOK =
-  "whsec_jOwO2ytLcWZoTWe1NGQt82Rab5K2zxJu";
+  "whsec_eti6tU32xKS3bs9tbWSU70ZJhqOfO1WF";
 STAT_BOOK_PRICES = [
-  "price_1JG5QWCzlGux4vukFQ7r6q5Y",
-  "price_1JG5RUCzlGux4vukvLMkjRmC",
-  "price_1JG5SZCzlGux4vukHzvKvoVs",
-  "price_1LPTKzCzlGux4vukN3IZ6pAK",
-  "price_1LPTMUCzlGux4vukG5A78THC",
-  "price_1LPTP2CzlGux4vuknzCP892m",
-  "price_1LPTQWCzlGux4vukLJibjtcp",
+  "price_1JJ3RhAobCjt2PuEqdcAa7rC",
+  "price_1JJ3QpAobCjt2PuEo9cWsuNX",
+  "price_1JJ3PTAobCjt2PuENGqQVOxr",
+  "price_1LPqsXAobCjt2PuEDFDhZnTS",
+  "price_1LPqtEAobCjt2PuEQM772wyu",
+  "price_1LPqtrAobCjt2PuEdvSNpti0",
+  "price_1LPquTAobCjt2PuEmTjWyuIM",
 ];
 
 const JURA_BOOK_NAME = "Jura";
