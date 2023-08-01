@@ -28,11 +28,11 @@ findUser = async (req, res) => {
 };
 
 changePassword = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, bookToAccess } = req.body;
   await connection.connect();
 
   try {
-    const existUserResult = await getUser(connection, email);
+    const existUserResult = await getUser(connection, email, bookToAccess);
 
     if (!existUserResult[0]) {
       await connection.end();
@@ -45,7 +45,7 @@ changePassword = async (req, res) => {
       });
     }
 
-    await updateUser(connection, email, password);
+    await updateUser(connection, email, password, bookToAccess);
 
     await connection.end();
   } catch (e) {
@@ -81,13 +81,13 @@ async function getUser(connection, email, bookToAccess) {
   });
 }
 
-async function updateUser(connection, userEmail, password) {
+async function updateUser(connection, userEmail, password, bookToAccess) {
   return new Promise((resolve, reject) => {
     connection.query(
       {
         sql: "UPDATE external_users SET user_password = ? WHERE user_email = ? AND `book_access` = ?",
         timeout: 10000,
-        values: [password, userEmail, process.env.GATSBY_BOOK_ACCESS],
+        values: [password, userEmail, bookToAccess],
       },
       function (error, results, fields) {
         if (error) reject(err);
