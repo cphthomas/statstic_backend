@@ -14,17 +14,23 @@ const app = express();
 //   })
 // );
 
-const allowedOrigins = ['https://s.tepedu.com', 'https://jura.tepedu.com'];
+const allowedOrigins = [
+  "https://s.tepedu.com",
+  "https://jura.tepedu.com",
+  "https://www.tepedu.com",
+];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
 
 app.get("/", (req, res) => {
   const targetUrl = "https://www.tepedu.dk/";
