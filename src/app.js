@@ -17,7 +17,7 @@ const app = express();
 const allowedOrigins = [
   "https://s.tepedu.com",
   "https://jura.tepedu.com",
-  "http://localhost:5000",
+  "https://localhost:5000",
 ];
 
 app.use(
