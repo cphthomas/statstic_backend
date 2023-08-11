@@ -14,6 +14,11 @@ app.use(
   })
 );
 
+app.get("/", (req, res) => {
+  const targetUrl = "https://www.tepedu.dk/";
+  res.redirect(targetUrl);
+});
+
 app.get("/app", (req, res) => {
   return res.send({ data: [{ name: "abc" }, { name: "bbb" }] });
 });
