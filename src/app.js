@@ -14,16 +14,11 @@ const app = express();
 //   })
 // );
 
-const allowedOrigins = [
-  "https://s.tepedu.com",
-  "https://jura.tepedu.com",
-  "undefined",
-];
+const allowedOrigins = ["https://s.tepedu.com", "https://jura.tepedu.com"];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      console.log(`origin:${origin}`);
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
