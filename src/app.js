@@ -17,12 +17,13 @@ const app = express();
 const allowedOrigins = [
   "https://s.tepedu.com",
   "https://jura.tepedu.com",
-  "https://localhost:5000",
+  "http://localhost:5000",
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
+      console.log(`origin:${origin}`);
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
