@@ -8,11 +8,11 @@ var shell = require("shelljs");
 // init app
 const app = express();
 
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+// app.use(
+//   cors({
+//     origin: "*",
+//   })
+// );
 
 app.get("/", (req, res) => {
   const targetUrl = "https://www.tepedu.dk/";
