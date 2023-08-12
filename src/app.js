@@ -14,6 +14,11 @@ const app = express();
 //   })
 // );
 
+app.get("/", (req, res) => {
+  const targetUrl = "https://www.tepedu.dk/";
+  res.redirect(targetUrl);
+});
+
 const allowedOrigins = ["https://s.tepedu.com", "https://jura.tepedu.com"];
 
 app.use(
@@ -27,11 +32,6 @@ app.use(
     },
   })
 );
-
-app.get("/", (req, res) => {
-  const targetUrl = "https://www.tepedu.dk/";
-  res.redirect(targetUrl);
-});
 
 app.get("/app", (req, res) => {
   return res.send({ data: [{ name: "abc" }, { name: "bbb" }] });
