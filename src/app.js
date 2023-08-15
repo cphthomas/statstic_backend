@@ -8,30 +8,30 @@ var shell = require("shelljs");
 // init app
 const app = express();
 
-// app.use(
-//   cors({
-//     origin: "*",
-//   })
-// );
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 app.get("/", (req, res) => {
   const targetUrl = "https://www.tepedu.dk/";
   res.redirect(targetUrl);
 });
 
-const allowedOrigins = ["https://s.tepedu.com", "https://jura.tepedu.com"];
+// const allowedOrigins = ["https://s.tepedu.com", "https://jura.tepedu.com"];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`Not allowed by CORS origin:${origin}`));
-      }
-    },
-  })
-);
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       if (allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error(`Not allowed by CORS origin:${origin}`));
+//       }
+//     },
+//   })
+// );
 
 app.get("/app", (req, res) => {
   return res.send({ data: [{ name: "abc" }, { name: "bbb" }] });
